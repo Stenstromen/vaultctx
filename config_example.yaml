@@ -1,0 +1,6 @@
+---
+- name: Vault1
+  address: "https://vault:8200"
+  token: hvs.abcdefghij1234567890
+  cacert: /tls/vaultca.crt
+  tls_server_name: vault.local
