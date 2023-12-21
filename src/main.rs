@@ -188,7 +188,7 @@ fn print_section_details(section_name: &str) {
     for config in configs {
         if config.name == section_name {
             config_data.push_str(&format!("export VAULT_CONTEXT='{}'\n", config.name));
-            config_data.push_str(&format!("export VAULT_ADDRESS='{}'\n", config.addr));
+            config_data.push_str(&format!("export VAULT_ADDR='{}'\n", config.addr));
             config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token));
 
             if let Some(cacert) = &config.cacert {
