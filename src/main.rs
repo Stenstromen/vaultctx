@@ -25,14 +25,12 @@ fn main() {
         delete_entry(&name);
     } else if let Some(section_name) = args.section_name {
         print_section_details(&section_name);
-        //prepare_for_context_switch(&section_name, &dirs::home_dir().expect("Failed to find home directory"));
     } else {
         list_contexts();
     }
 }
 
 fn apply_and_save_context(config_data: &str, section_name: &str, home_dir: &PathBuf) {
-    // Update ~/.vctx with the new context data
     let vctx_path = home_dir.join(".vctx");
     let mut file = OpenOptions::new()
         .write(true)
@@ -91,7 +89,7 @@ fn switch_to_previous_context() {
     save_current_context();
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     if let Some(previous_context) = get_previous_context() {
-        let config_data = String::new(); // Populate config_data for previous_context
+        let config_data = String::new();
         apply_and_save_context(&config_data, &previous_context, &home_dir);
         println!("Switched back to previous context {}", previous_context);
     } else {
@@ -193,11 +191,10 @@ fn print_section_details(section_name: &str) {
             config_data.push_str(&format!("export VAULT_ADDRESS='{}'\n", config.addr));
             config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token));
 
-            // Optional fields
             if let Some(cacert) = &config.cacert {
                 config_data.push_str(&format!("export VAULT_CACERT='{}'\n", cacert));
             }
-            // ... repeat for other fields ...
+            
             if let Some(tls_server_name) = &config.tls_server_name {
                 config_data.push_str(
                     &format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name)
@@ -288,7 +285,6 @@ fn append_to_shell_rc(home: &str, line: &str) {
     let bash_rc = format!("{}/.bashrc", home);
     let zsh_rc = format!("{}/.zshrc", home);
 
-    // This function will append the line to .bashrc or .zshrc if it doesn't already contain it
     let append_if_missing = |file_path: &str| {
         if let Ok(content) = fs::read_to_string(file_path) {
             if !content.contains(line) {
