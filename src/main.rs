@@ -4,12 +4,15 @@ use serde::{ Deserialize, Serialize };
 use serde_yaml;
 use std::fmt;
 use std::fs::File;
-use std::path::Path;
+use std::path::{ Path, PathBuf };
 use std::{ fs::{ self, OpenOptions }, io::Write, os::unix::prelude::PermissionsExt, env };
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    #[arg(short, long)]
+    switchcontext: bool,
+
     #[arg(short, long)]
     currentcontext: bool,
 
@@ -41,7 +44,7 @@ impl fmt::Display for Format {
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
     name: String,
-    address: String,
+    addr: String,
     token: String,
     cacert: Option<String>,
     tls_server_name: Option<String>,
@@ -79,12 +82,83 @@ fn main() {
                 println!("No Vault Context found");
             }
         }
+    } else if args.switchcontext {
+        switch_to_previous_context();
     } else if let Some(name) = args.delete {
         delete_entry(&name);
     } else if let Some(section_name) = args.section_name {
         print_section_details(&section_name);
+        //prepare_for_context_switch(&section_name, &dirs::home_dir().expect("Failed to find home directory"));
     } else {
         list_contexts();
+    }
+}
+
+fn apply_and_save_context(config_data: &str, section_name: &str, home_dir: &PathBuf) {
+    // Update ~/.vctx with the new context data
+    let vctx_path = home_dir.join(".vctx");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&vctx_path)
+        .expect("Failed to open or create .vctx file");
+
+    file.write_all(config_data.as_bytes()).expect("Failed to write to .vctx file");
+    fs::set_permissions(&vctx_path, fs::Permissions::from_mode(0o600)).expect(
+        "Failed to set file permissions"
+    );
+
+    append_to_shell_rc(home_dir.to_str().unwrap(), "[ -f ~/.vctx ] && source ~/.vctx");
+
+    println!("\x1b[32mVault Context Switched to {}\x1b[0m", section_name);
+    println!("\x1b[32mPlease reapply shell file or run 'source ~/.vctx' to apply\x1b[0m");
+}
+
+const PREVIOUS_CONTEXT_FILE: &str = ".previous_vault_context";
+
+fn get_previous_context_file_path() -> PathBuf {
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    home_dir.join(PREVIOUS_CONTEXT_FILE)
+}
+
+fn save_current_context() {
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    let vctx_path = home_dir.join(".vctx");
+
+    if let Ok(contents) = fs::read_to_string(&vctx_path) {
+        if
+            let Some(context_line) = contents
+                .lines()
+                .find(|line| line.starts_with("export VAULT_CONTEXT='"))
+        {
+            if let Some(start) = context_line.find("'") {
+                let end = context_line.rfind("'").unwrap_or(context_line.len());
+                let current_context = &context_line[start + 1..end];
+
+                let previous_context_file_path = get_previous_context_file_path();
+                fs::write(previous_context_file_path, current_context).expect(
+                    "Failed to write current context to file"
+                );
+            }
+        }
+    }
+}
+
+fn get_previous_context() -> Option<String> {
+    let previous_context_file_path = get_previous_context_file_path();
+    fs::read_to_string(previous_context_file_path).ok()
+}
+
+fn switch_to_previous_context() {
+    save_current_context();
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    if let Some(previous_context) = get_previous_context() {
+        let config_data = String::new(); // Populate config_data for previous_context
+        apply_and_save_context(&config_data, &previous_context, &home_dir);
+        println!("Switched back to previous context {}", previous_context);
+    } else {
+        println!("No previous context found");
     }
 }
 
@@ -98,7 +172,7 @@ fn create_vaultctx_file(_configs: Vec<Config>) {
 
     let dummy_vault = Config {
         name: "dummy_vault".to_string(),
-        address: "127.0.0.1".to_string(),
+        addr: "127.0.0.1".to_string(),
         token: "sometoken".to_string(),
         cacert: Some("asd".to_string()),
         tls_server_name: Some("asd".to_string()),
@@ -124,7 +198,7 @@ fn create_vaultctx_file(_configs: Vec<Config>) {
         disable_redirects: Some("asd".to_string()),
     };
 
-    let mut configs = vec![dummy_vault];
+    let configs = vec![dummy_vault];
 
     let yaml = serde_yaml::to_string(&configs).expect("Failed to serialize to YAML");
 
@@ -179,7 +253,7 @@ fn print_section_details(section_name: &str) {
     for config in configs {
         if config.name == section_name {
             config_data.push_str(&format!("export VAULT_CONTEXT='{}'\n", config.name));
-            config_data.push_str(&format!("export VAULT_ADDRESS='{}'\n", config.address));
+            config_data.push_str(&format!("export VAULT_ADDRESS='{}'\n", config.addr));
             config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token));
 
             // Optional fields
@@ -262,26 +336,8 @@ fn print_section_details(section_name: &str) {
         }
     }
     if found {
-        let home_dir = dirs::home_dir().expect("Failed to find home directory");
-        let vctx_path = home_dir.join(".vctx");
-
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&vctx_path)
-            .expect("Failed to open or create .vctx file");
-
-        file.write_all(config_data.as_bytes()).expect("Failed to write to .vctx file");
-
-        fs::set_permissions(&vctx_path, fs::Permissions::from_mode(0o600)).expect(
-            "Failed to set file permissions"
-        );
-
-        append_to_shell_rc(home_dir.to_str().unwrap(), "[ -f ~/.vctx ] && source ~/.vctx");
-
-        println!("\x1b[32mVault Context Switched to {}\x1b[0m", section_name);
-        println!("\x1b[32mPlease reapply shell file or run 'source ~/.vctx' to apply\x1b[0m");
+        save_current_context();
+        apply_and_save_context(&config_data, section_name, &home_dir);
     } else {
         println!("Section '{}' not found", section_name);
     }
