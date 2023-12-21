@@ -1,18 +1,16 @@
 use dirs;
 use clap::Parser;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use serde_yaml;
-use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
 use std::path::Path;
-use std::{fs::{self, OpenOptions}, io::Write, os::unix::prelude::PermissionsExt, env};
+use std::{ fs::{ self, OpenOptions }, io::Write, os::unix::prelude::PermissionsExt, env };
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, version, about, long_about = None)]
-
 struct Args {
-    #[arg(short,long)]
+    #[arg(short, long)]
     currentcontext: bool,
 
     #[arg(short, long)]
@@ -76,7 +74,7 @@ fn main() {
         match env::var("VAULT_CONTEXT") {
             Ok(val) if !val.is_empty() => {
                 println!("{}", val);
-            },
+            }
             _ => {
                 println!("No Vault Context found");
             }
@@ -90,7 +88,7 @@ fn main() {
     }
 }
 
-fn create_vaultctx_file(configs: Vec<Config>) {
+fn create_vaultctx_file(_configs: Vec<Config>) {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     let config_path = home_dir.join(".vaultctx");
 
@@ -134,7 +132,6 @@ fn create_vaultctx_file(configs: Vec<Config>) {
     file.write_all(yaml.as_bytes()).expect("Failed to write to file");
 }
 
-
 fn list_contexts() {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     let config_path = home_dir.join(".vaultctx");
@@ -145,37 +142,35 @@ fn list_contexts() {
         return;
     }
 
-    let contents = fs::read_to_string(&config_path)
-        .expect("Failed to read config");
+    let contents = fs::read_to_string(&config_path).expect("Failed to read config");
 
-let configs: Vec<Config> = serde_yaml::from_str(&contents)
-    .expect("Failed to parse YAML");
+    let configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
 
-for config in configs {
-    println!("{}", config.name);
-}
+    for config in configs {
+        println!("{}", config.name);
+    }
 }
 
 fn delete_entry(entry_name: &str) {
-    let contents = fs::read_to_string("config.yaml")
-        .expect("Failed to read config.yaml");
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    let config_path = home_dir.join(".vaultctx");
+    let contents = fs::read_to_string(config_path).expect("Failed to read .vaultctx");
 
-    let mut configs: Vec<Config> = serde_yaml::from_str(&contents)
-        .expect("Failed to parse YAML");
+    let mut configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
 
     configs.retain(|config| config.name != entry_name);
 
-    let new_contents = serde_yaml::to_string(&configs)
-        .expect("Failed to serialize data");
+    let new_contents = serde_yaml::to_string(&configs).expect("Failed to serialize data");
 
-    fs::write("config.yaml", new_contents)
-        .expect("Failed to write to config.yaml");
+    fs::write(contents, new_contents).expect("Failed to write to .vaultctx");
 
     println!("Entry '{}' deleted", entry_name);
 }
 
 fn print_section_details(section_name: &str) {
-    let contents = fs::read_to_string("config.yaml").expect("Failed to read config.yaml");
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    let config_path = home_dir.join(".vaultctx");
+    let contents = fs::read_to_string(config_path).expect("Failed to read .vaultctx");
     let configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
 
     let mut found = false;
@@ -193,7 +188,9 @@ fn print_section_details(section_name: &str) {
             }
             // ... repeat for other fields ...
             if let Some(tls_server_name) = &config.tls_server_name {
-                config_data.push_str(&format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name));
+                config_data.push_str(
+                    &format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name)
+                );
             }
             if let Some(capath) = &config.capath {
                 config_data.push_str(&format!("export VAULT_CAPATH='{}'\n", capath));
@@ -205,7 +202,9 @@ fn print_section_details(section_name: &str) {
                 config_data.push_str(&format!("export VAULT_CLIENT_KEY='{}'\n", client_key));
             }
             if let Some(client_timeout) = &config.client_timeout {
-                config_data.push_str(&format!("export VAULT_CLIENT_TIMEOUT='{}'\n", client_timeout));
+                config_data.push_str(
+                    &format!("export VAULT_CLIENT_TIMEOUT='{}'\n", client_timeout)
+                );
             }
             if let Some(cluster_addr) = &config.cluster_addr {
                 config_data.push_str(&format!("export VAULT_CLUSTER_ADDR='{}'\n", cluster_addr));
@@ -253,41 +252,40 @@ fn print_section_details(section_name: &str) {
                 config_data.push_str(&format!("export VAULT_PROXY_ADDR='{}'\n", proxy_addr));
             }
             if let Some(disable_redirects) = &config.disable_redirects {
-                config_data.push_str(&format!("export VAULT_DISABLE_REDIRECTS='{}'\n", disable_redirects));
+                config_data.push_str(
+                    &format!("export VAULT_DISABLE_REDIRECTS='{}'\n", disable_redirects)
+                );
             }
-
 
             found = true;
             break;
         }
-
-        
     }
-if found {
-            let home_dir = dirs::home_dir().expect("Failed to find home directory");
-            let vctx_path = home_dir.join(".vctx");
-    
-            let mut file = OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .open(&vctx_path)
-                .expect("Failed to open or create .vctx file");
-    
-            file.write_all(config_data.as_bytes())
-                .expect("Failed to write to .vctx file");
-    
-            fs::set_permissions(&vctx_path, fs::Permissions::from_mode(0o600))
-                .expect("Failed to set file permissions");
-    
-            append_to_shell_rc(home_dir.to_str().unwrap(), "[ -f ~/.vctx ] && source ~/.vctx");
-    
-            println!("\x1b[32mVault Context Switched to {}\x1b[0m", section_name);
-            println!("\x1b[32mPlease reapply shell file or run 'source ~/.vctx' to apply\x1b[0m");
-        } else {
-            println!("Section '{}' not found", section_name);
-        }
-    
+    if found {
+        let home_dir = dirs::home_dir().expect("Failed to find home directory");
+        let vctx_path = home_dir.join(".vctx");
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(&vctx_path)
+            .expect("Failed to open or create .vctx file");
+
+        file.write_all(config_data.as_bytes()).expect("Failed to write to .vctx file");
+
+        fs::set_permissions(&vctx_path, fs::Permissions::from_mode(0o600)).expect(
+            "Failed to set file permissions"
+        );
+
+        append_to_shell_rc(home_dir.to_str().unwrap(), "[ -f ~/.vctx ] && source ~/.vctx");
+
+        println!("\x1b[32mVault Context Switched to {}\x1b[0m", section_name);
+        println!("\x1b[32mPlease reapply shell file or run 'source ~/.vctx' to apply\x1b[0m");
+    } else {
+        println!("Section '{}' not found", section_name);
+    }
+
     if !found {
         create_vaultctx_file(Vec::new());
     }
