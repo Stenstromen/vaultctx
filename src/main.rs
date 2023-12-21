@@ -1,74 +1,11 @@
+mod model;
+use model::{Args, Config, Format};
 use dirs;
 use clap::Parser;
-use serde::{ Deserialize, Serialize };
 use serde_yaml;
-use std::fmt;
 use std::fs::File;
 use std::path::{ Path, PathBuf };
 use std::{ fs::{ self, OpenOptions }, io::Write, os::unix::prelude::PermissionsExt, env };
-
-#[derive(Parser, Debug, Serialize, Deserialize)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    #[arg(short, long)]
-    switchcontext: bool,
-
-    #[arg(short, long)]
-    currentcontext: bool,
-
-    #[arg(short, long)]
-    delete: Option<String>,
-
-    #[arg(required = false)]
-    section_name: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-enum Format {
-    Table,
-    Json,
-    Yaml,
-}
-
-impl fmt::Display for Format {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match self {
-            Format::Table => "table",
-            Format::Json => "json",
-            Format::Yaml => "yaml",
-        })
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Config {
-    name: String,
-    addr: String,
-    token: String,
-    cacert: Option<String>,
-    tls_server_name: Option<String>,
-    capath: Option<String>,
-    client_cert: Option<String>,
-    client_key: Option<String>,
-    client_timeout: Option<String>,
-    cluster_addr: Option<String>,
-    format: Option<Format>,
-    license: Option<String>,
-    license_path: Option<String>,
-    log_level: Option<String>,
-    max_retries: Option<String>,
-    redirect_addr: Option<String>,
-    skip_verify: Option<String>,
-    cli_no_color: Option<String>,
-    rate_limit: Option<String>,
-    namespace: Option<String>,
-    srv_lookup: Option<String>,
-    mfa: Option<String>,
-    http_proxy: Option<String>,
-    proxy_addr: Option<String>,
-    disable_redirects: Option<String>,
-}
 
 fn main() {
     let args = Args::parse();
