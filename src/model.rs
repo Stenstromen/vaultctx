@@ -1,6 +1,6 @@
 use core::fmt;
 
-use clap::{command, Parser};
+/* use clap::{command, Parser}; */
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -30,22 +30,6 @@ pub struct Config {
     pub http_proxy: Option<String>,
     pub proxy_addr: Option<String>,
     pub disable_redirects: Option<String>,
-}
-
-#[derive(Parser, Debug, Serialize, Deserialize)]
-#[command(author, version, about, long_about = None)]
-pub struct Args {
-    #[arg(short, long)]
-    pub switchcontext: bool,
-
-    #[arg(short, long)]
-    pub currentcontext: bool,
-
-    #[arg(short, long)]
-    pub delete: Option<String>,
-
-    #[arg(required = false)]
-    pub section_name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

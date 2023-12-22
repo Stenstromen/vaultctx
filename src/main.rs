@@ -1,5 +1,8 @@
+mod cmd;
 mod model;
-use model::{Args, Config, Format};
+
+use cmd::Args;
+use model::{ Config, Format };
 use dirs;
 use clap::Parser;
 use serde_yaml;
@@ -23,8 +26,8 @@ fn main() {
         switch_to_previous_context();
     } else if let Some(name) = args.delete {
         delete_entry(&name);
-    } else if let Some(section_name) = args.section_name {
-        print_section_details(&section_name);
+    } else if let Some(vault_context) = args.vault_context {
+        print_section_details(&vault_context);
     } else {
         list_contexts();
     }
@@ -194,7 +197,7 @@ fn print_section_details(section_name: &str) {
             if let Some(cacert) = &config.cacert {
                 config_data.push_str(&format!("export VAULT_CACERT='{}'\n", cacert));
             }
-            
+
             if let Some(tls_server_name) = &config.tls_server_name {
                 config_data.push_str(
                     &format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name)
