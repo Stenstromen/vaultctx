@@ -188,13 +188,56 @@ fn print_section_details(section_name: &str) {
     let mut found = false;
     let mut config_data = String::new();
 
+    fn append_env_var(config_data: &mut String, key: &str, value: Option<&String>) {
+        if let Some(val) = value {
+            config_data.push_str(&format!("export {}='{}'\n", key, val));
+        }
+    }
+
+    macro_rules! append_config {
+        // Specialized branch for Format enum
+        ($data:expr, $config:expr, $field:ident, $env_var:expr, Format) => {
+            if let Some(ref value) = $config.$field {
+                let value_str = match *value {
+                    Format::Table => "table",
+                    Format::Json => "json",
+                    Format::Yaml => "yaml",
+                };
+                $data.push_str(&format!("export {}='{}'\n", $env_var, value_str));
+            }
+        };
+        // General branch for other types
+        ($data:expr, $config:expr, $field:ident, $env_var:expr) => {
+            if let Some(ref value) = $config.$field {
+                $data.push_str(&format!("export {}='{}'\n", $env_var, value));
+            }
+        };
+    }
+    
+    
+
     for config in configs {
         if config.name == section_name {
-            config_data.push_str(&format!("export VAULT_CONTEXT='{}'\n", config.name));
+            /*             config_data.push_str(&format!("export VAULT_CONTEXT='{}'\n", config.name));
             config_data.push_str(&format!("export VAULT_ADDR='{}'\n", config.addr));
-            config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token));
+            config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token)); */
+            append_env_var(&mut config_data, "VAULT_CONTEXT", Some(&config.name));
+            append_env_var(&mut config_data, "VAULT_ADDR", Some(&config.addr));
+            append_env_var(&mut config_data, "VAULT_TOKEN", Some(&config.token));
 
-            if let Some(cacert) = &config.cacert {
+            append_config!(&mut config_data, config, cacert, "VAULT_CACERT");
+            append_config!(&mut config_data, config, tls_server_name, "VAULT_TLS_SERVER_NAME");
+            append_config!(&mut config_data, config, capath, "VAULT_CAPATH");
+            append_config!(&mut config_data, config, client_cert, "VAULT_CLIENT_CERT");
+            append_config!(&mut config_data, config, client_key, "VAULT_CLIENT_KEY");
+            append_config!(&mut config_data, config, client_timeout, "VAULT_CLIENT_TIMEOUT");
+            append_config!(&mut config_data, config, cluster_addr, "VAULT_CLUSTER_ADDR");
+            append_config!(&mut config_data, config, format, "VAULT_FORMAT", Format);
+            append_config!(&mut config_data, config, license, "VAULT_LICENCE");
+            append_config!(&mut config_data, config, license_path, "VAULT_LICENCE_PATH");
+            append_config!(&mut config_data, config, log_level, "VAULT_LOG_LEVEL");
+
+            /* if let Some(cacert) = &config.cacert {
                 config_data.push_str(&format!("export VAULT_CACERT='{}'\n", cacert));
             }
 
@@ -202,7 +245,7 @@ fn print_section_details(section_name: &str) {
                 config_data.push_str(
                     &format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name)
                 );
-            }
+            } 
             if let Some(capath) = &config.capath {
                 config_data.push_str(&format!("export VAULT_CAPATH='{}'\n", capath));
             }
@@ -217,6 +260,7 @@ fn print_section_details(section_name: &str) {
                     &format!("export VAULT_CLIENT_TIMEOUT='{}'\n", client_timeout)
                 );
             }
+            */
             if let Some(cluster_addr) = &config.cluster_addr {
                 config_data.push_str(&format!("export VAULT_CLUSTER_ADDR='{}'\n", cluster_addr));
             }
