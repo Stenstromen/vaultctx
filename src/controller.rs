@@ -1,6 +1,6 @@
-use std::{path::Path, fs::File, io::Write};
+use std::{ path::Path, fs::{File, self}, io::Write };
 
-use crate::model::{Config, Format, LogLevel};
+use crate::model::{ Config, Format, LogLevel };
 
 pub fn create_vaultctx_file(_configs: Vec<Config>) {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
@@ -44,4 +44,20 @@ pub fn create_vaultctx_file(_configs: Vec<Config>) {
 
     let mut file = File::create(&config_path).expect("Failed to create file");
     file.write_all(yaml.as_bytes()).expect("Failed to write to file");
+}
+
+pub fn delete_entry(entry_name: &str) {
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    let config_path = home_dir.join(".vaultctx");
+    let contents = fs::read_to_string(config_path).expect("Failed to read .vaultctx");
+
+    let mut configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
+
+    configs.retain(|config| config.name != entry_name);
+
+    let new_contents = serde_yaml::to_string(&configs).expect("Failed to serialize data");
+
+    fs::write(contents, new_contents).expect("Failed to write to .vaultctx");
+
+    println!("Entry '{}' deleted", entry_name);
 }
