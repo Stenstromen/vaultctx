@@ -213,14 +213,9 @@ fn print_section_details(section_name: &str) {
             }
         };
     }
-    
-    
 
     for config in configs {
         if config.name == section_name {
-            /*             config_data.push_str(&format!("export VAULT_CONTEXT='{}'\n", config.name));
-            config_data.push_str(&format!("export VAULT_ADDR='{}'\n", config.addr));
-            config_data.push_str(&format!("export VAULT_TOKEN='{}'\n", config.token)); */
             append_env_var(&mut config_data, "VAULT_CONTEXT", Some(&config.name));
             append_env_var(&mut config_data, "VAULT_ADDR", Some(&config.addr));
             append_env_var(&mut config_data, "VAULT_TOKEN", Some(&config.token));
@@ -236,81 +231,17 @@ fn print_section_details(section_name: &str) {
             append_config!(&mut config_data, config, license, "VAULT_LICENCE");
             append_config!(&mut config_data, config, license_path, "VAULT_LICENCE_PATH");
             append_config!(&mut config_data, config, log_level, "VAULT_LOG_LEVEL");
-
-            /* if let Some(cacert) = &config.cacert {
-                config_data.push_str(&format!("export VAULT_CACERT='{}'\n", cacert));
-            }
-
-            if let Some(tls_server_name) = &config.tls_server_name {
-                config_data.push_str(
-                    &format!("export VAULT_TLS_SERVER_NAME='{}'\n", tls_server_name)
-                );
-            } 
-            if let Some(capath) = &config.capath {
-                config_data.push_str(&format!("export VAULT_CAPATH='{}'\n", capath));
-            }
-            if let Some(client_cert) = &config.client_cert {
-                config_data.push_str(&format!("export VAULT_CLIENT_CERT='{}'\n", client_cert));
-            }
-            if let Some(client_key) = &config.client_key {
-                config_data.push_str(&format!("export VAULT_CLIENT_KEY='{}'\n", client_key));
-            }
-            if let Some(client_timeout) = &config.client_timeout {
-                config_data.push_str(
-                    &format!("export VAULT_CLIENT_TIMEOUT='{}'\n", client_timeout)
-                );
-            }
-            */
-            if let Some(cluster_addr) = &config.cluster_addr {
-                config_data.push_str(&format!("export VAULT_CLUSTER_ADDR='{}'\n", cluster_addr));
-            }
-            if let Some(format) = &config.format {
-                config_data.push_str(&format!("export VAULT_FORMAT='{}'\n", format));
-            }
-            if let Some(license) = &config.license {
-                config_data.push_str(&format!("export VAULT_LICENSE='{}'\n", license));
-            }
-            if let Some(license_path) = &config.license_path {
-                config_data.push_str(&format!("export VAULT_LICENSE_PATH='{}'\n", license_path));
-            }
-            if let Some(log_level) = &config.log_level {
-                config_data.push_str(&format!("export VAULT_LOG_LEVEL='{}'\n", log_level));
-            }
-            if let Some(max_retries) = &config.max_retries {
-                config_data.push_str(&format!("export VAULT_MAX_RETRIES='{}'\n", max_retries));
-            }
-            if let Some(redirect_addr) = &config.redirect_addr {
-                config_data.push_str(&format!("export VAULT_REDIRECT_ADDR='{}'\n", redirect_addr));
-            }
-            if let Some(skip_verify) = &config.skip_verify {
-                config_data.push_str(&format!("export VAULT_SKIP_VERIFY='{}'\n", skip_verify));
-            }
-            if let Some(cli_no_color) = &config.cli_no_color {
-                config_data.push_str(&format!("export VAULT_CLI_NO_COLOR='{}'\n", cli_no_color));
-            }
-            if let Some(rate_limit) = &config.rate_limit {
-                config_data.push_str(&format!("export VAULT_RATE_LIMIT='{}'\n", rate_limit));
-            }
-            if let Some(namespace) = &config.namespace {
-                config_data.push_str(&format!("export VAULT_NAMESPACE='{}'\n", namespace));
-            }
-            if let Some(srv_lookup) = &config.srv_lookup {
-                config_data.push_str(&format!("export VAULT_SRV_LOOKUP='{}'\n", srv_lookup));
-            }
-            if let Some(mfa) = &config.mfa {
-                config_data.push_str(&format!("export VAULT_MFA='{}'\n", mfa));
-            }
-            if let Some(http_proxy) = &config.http_proxy {
-                config_data.push_str(&format!("export VAULT_HTTP_PROXY='{}'\n", http_proxy));
-            }
-            if let Some(proxy_addr) = &config.proxy_addr {
-                config_data.push_str(&format!("export VAULT_PROXY_ADDR='{}'\n", proxy_addr));
-            }
-            if let Some(disable_redirects) = &config.disable_redirects {
-                config_data.push_str(
-                    &format!("export VAULT_DISABLE_REDIRECTS='{}'\n", disable_redirects)
-                );
-            }
+            append_config!(&mut config_data, config, max_retries, "VAULT_MAX_RETRIES");
+            append_config!(&mut config_data, config, redirect_addr, "VAULT_REDIRECT_ADDR");
+            append_config!(&mut config_data, config, skip_verify, "VAULT_SKIP_VERIFY");
+            append_config!(&mut config_data, config, cli_no_color, "VAULT_CLI_NO_COLOR");
+            append_config!(&mut config_data, config, rate_limit, "VAULT_RATE_LIMIT");
+            append_config!(&mut config_data, config, namespace, "VAULT_NAMESPACE");
+            append_config!(&mut config_data, config, srv_lookup, "VAULT_SRV_LOOKUP");
+            append_config!(&mut config_data, config, mfa, "VAULT_MFA");
+            append_config!(&mut config_data, config, http_proxy, "VAULT_HTTP_PROXY");
+            append_config!(&mut config_data, config, proxy_addr, "VAULT_PROXY_ADDR");
+            append_config!(&mut config_data, config, disable_redirects, "VAULT_DISABLE_REDIRECTS");
 
             found = true;
             break;
