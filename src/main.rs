@@ -2,7 +2,7 @@ mod cmd;
 mod model;
 
 use cmd::Args;
-use model::{ Config, Format };
+use model::{ Config, Format, LogLevel };
 use dirs;
 use clap::Parser;
 use serde_yaml;
@@ -122,7 +122,7 @@ fn create_vaultctx_file(_configs: Vec<Config>) {
         format: Some(Format::Table),
         license: Some("asd".to_string()),
         license_path: Some("asd".to_string()),
-        log_level: Some("asd".to_string()),
+        log_level: Some(LogLevel::Info),
         max_retries: Some("asd".to_string()),
         redirect_addr: Some("asd".to_string()),
         skip_verify: Some("asd".to_string()),

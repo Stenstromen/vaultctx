@@ -1,7 +1,7 @@
 use core::fmt;
 
 /* use clap::{command, Parser}; */
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -18,7 +18,7 @@ pub struct Config {
     pub format: Option<Format>,
     pub license: Option<String>,
     pub license_path: Option<String>,
-    pub log_level: Option<String>,
+    pub log_level: Option<LogLevel>,
     pub max_retries: Option<String>,
     pub redirect_addr: Option<String>,
     pub skip_verify: Option<String>,
@@ -34,6 +34,17 @@ pub struct Config {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+pub enum LogLevel {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Err,
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Format {
     Table,
     Json,
@@ -46,6 +57,18 @@ impl fmt::Display for Format {
             Format::Table => "table",
             Format::Json => "json",
             Format::Yaml => "yaml",
+        })
+    }
+}
+
+impl fmt::Display for LogLevel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            LogLevel::Trace => "trace",
+            LogLevel::Debug => "debug",
+            LogLevel::Info => "info",
+            LogLevel::Warn => "warn",
+            LogLevel::Err => "error",
         })
     }
 }
