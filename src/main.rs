@@ -1,13 +1,16 @@
 mod cmd;
+mod view;
 mod model;
+mod controller;
 
+use controller::create_vaultctx_file;
+use view::list_contexts;
 use cmd::Args;
-use model::{ Config, Format, LogLevel };
+use model::{ Config, Format };
 use dirs;
 use clap::Parser;
 use serde_yaml;
-use std::fs::File;
-use std::path::{ Path, PathBuf };
+use std::path::PathBuf;
 use std::{ fs::{ self, OpenOptions }, io::Write, os::unix::prelude::PermissionsExt, env };
 
 fn main() {
@@ -97,69 +100,6 @@ fn switch_to_previous_context() {
         println!("Switched back to previous context {}", previous_context);
     } else {
         println!("No previous context found");
-    }
-}
-
-fn create_vaultctx_file(_configs: Vec<Config>) {
-    let home_dir = dirs::home_dir().expect("Failed to find home directory");
-    let config_path = home_dir.join(".vaultctx");
-
-    if !Path::new(&config_path).exists() {
-        File::create(&config_path).expect("Failed to create file");
-    }
-
-    let dummy_vault = Config {
-        name: "dummy_vault".to_string(),
-        addr: "127.0.0.1".to_string(),
-        token: "sometoken".to_string(),
-        cacert: Some("asd".to_string()),
-        tls_server_name: Some("asd".to_string()),
-        capath: Some("asd".to_string()),
-        client_cert: Some("asd".to_string()),
-        client_key: Some("asd".to_string()),
-        client_timeout: Some("asd".to_string()),
-        cluster_addr: Some("asd".to_string()),
-        format: Some(Format::Table),
-        license: Some("asd".to_string()),
-        license_path: Some("asd".to_string()),
-        log_level: Some(LogLevel::Info),
-        max_retries: Some("asd".to_string()),
-        redirect_addr: Some("asd".to_string()),
-        skip_verify: Some("asd".to_string()),
-        cli_no_color: Some("asd".to_string()),
-        rate_limit: Some("asd".to_string()),
-        namespace: Some("asd".to_string()),
-        srv_lookup: Some("asd".to_string()),
-        mfa: Some("asd".to_string()),
-        http_proxy: Some("asd".to_string()),
-        proxy_addr: Some("asd".to_string()),
-        disable_redirects: Some("asd".to_string()),
-    };
-
-    let configs = vec![dummy_vault];
-
-    let yaml = serde_yaml::to_string(&configs).expect("Failed to serialize to YAML");
-
-    let mut file = File::create(&config_path).expect("Failed to create file");
-    file.write_all(yaml.as_bytes()).expect("Failed to write to file");
-}
-
-fn list_contexts() {
-    let home_dir = dirs::home_dir().expect("Failed to find home directory");
-    let config_path = home_dir.join(".vaultctx");
-
-    if !Path::new(&config_path).exists() {
-        println!("Initial dummy config created at ~/.vaultctx");
-        create_vaultctx_file(Vec::new());
-        return;
-    }
-
-    let contents = fs::read_to_string(&config_path).expect("Failed to read config");
-
-    let configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
-
-    for config in configs {
-        println!("{}", config.name);
     }
 }
 
