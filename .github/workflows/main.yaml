@@ -131,15 +131,15 @@ jobs:
           asset_name: vaultctx_Linux_x86_64.tar.gz
           asset_content_type: application/gzip
 
-        - name: Upload Linux arm64 Asset
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ github.event.release.upload_url }}
-            asset_path: ./artifacts/vaultctx_Linux_arm64.tar.gz/vaultctx_Linux_arm64.tar.gz
-            asset_name: vaultctx_Linux_arm64.tar.gz
-            asset_content_type: application/gzip
+      - name: Upload Linux arm64 Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifacts/vaultctx_Linux_arm64.tar.gz/vaultctx_Linux_arm64.tar.gz
+          asset_name: vaultctx_Linux_arm64.tar.gz
+          asset_content_type: application/gzip
 
   homebrew-tap:
     needs: [build, checksum]
