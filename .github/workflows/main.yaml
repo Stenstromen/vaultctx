@@ -65,15 +65,14 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
-
-      - name: List files in directory
-        run: ls -lah
+        with:
+          path: artifacts/
 
       - name: Generate checksums
         run: |
-          for file in *.tar.gz; do
+          for file in artifacts/*.tar.gz; do
             if [ -f "$file" ]; then
-              sha256sum $file/$file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+              sha256sum "$file" >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
             else
               echo "Skipping $file, it is not a regular file."
             fi
