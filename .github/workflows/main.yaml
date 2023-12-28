@@ -73,7 +73,7 @@ jobs:
         run: |
           for file in *.tar.gz; do
             if [ -f "$file" ]; then
-              sha256sum $file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+              sha256sum $file/$file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
             else
               echo "Skipping $file, it is not a regular file."
             fi
