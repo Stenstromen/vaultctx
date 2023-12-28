@@ -5,13 +5,26 @@ use std::{
     os::unix::fs::PermissionsExt,
 };
 
-use crate::model::{ Config, Format, LogLevel, MaxRetries, SkipVerify, DisableRedirects, CliNoColor };
+use crate::model::{
+    Config,
+    Format,
+    LogLevel,
+    MaxRetries,
+    SkipVerify,
+    DisableRedirects,
+    CliNoColor,
+};
 
 const PREVIOUS_CONTEXT_FILE: &str = ".previous_vault_context";
 
 fn get_previous_context_file_path() -> PathBuf {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     home_dir.join(PREVIOUS_CONTEXT_FILE)
+}
+
+fn get_previous_context() -> Option<String> {
+    let previous_context_file_path = get_previous_context_file_path();
+    fs::read_to_string(previous_context_file_path).ok()
 }
 
 pub fn create_vaultctx_file(_configs: Vec<Config>) {
@@ -167,12 +180,10 @@ pub fn switch_to_previous_context() {
 pub fn rename_context(old_name: &str, new_name: &str) {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     let config_path = home_dir.join(".vaultctx");
-    
+
     // Read the existing configuration
-    let contents = fs::read_to_string(&config_path)
-        .expect("Failed to read .vaultctx");
-    let mut configs: Vec<Config> = serde_yaml::from_str(&contents)
-        .expect("Failed to parse YAML");
+    let contents = fs::read_to_string(&config_path).expect("Failed to read .vaultctx");
+    let mut configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
 
     // Find and update the entry with the new name
     let mut renamed = false;
@@ -186,16 +197,13 @@ pub fn rename_context(old_name: &str, new_name: &str) {
 
     if renamed {
         // Write the updated configuration back to the file
-        let new_contents = serde_yaml::to_string(&configs)
-            .expect("Failed to serialize data");
-        fs::write(&config_path, new_contents)
-            .expect("Failed to write to .vaultctx");
+        let new_contents = serde_yaml::to_string(&configs).expect("Failed to serialize data");
+        fs::write(&config_path, new_contents).expect("Failed to write to .vaultctx");
         println!("Context renamed from '{}' to '{}'", old_name, new_name);
     } else {
         println!("Context '{}' not found", old_name);
     }
 }
-
 
 fn save_current_context() {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
@@ -258,9 +266,4 @@ fn append_to_shell_rc(home: &str, line: &str) {
 
     append_if_missing(&bash_rc);
     append_if_missing(&zsh_rc);
-}
-
-fn get_previous_context() -> Option<String> {
-    let previous_context_file_path = get_previous_context_file_path();
-    fs::read_to_string(previous_context_file_path).ok()
 }

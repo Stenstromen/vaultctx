@@ -6,7 +6,6 @@ use serde::{ Deserialize, Serialize };
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RenameArgs(pub String, pub String);
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub name: String,
