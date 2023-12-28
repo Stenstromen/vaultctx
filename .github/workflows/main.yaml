@@ -66,10 +66,17 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
+      - name: List files in directory
+        run: ls -lah
+
       - name: Generate checksums
         run: |
           for file in *.tar.gz; do
-            sha256sum $file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+            if [ -f "$file" ]; then
+              sha256sum $file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+            else
+              echo "Skipping $file, it is not a regular file."
+            fi
           done
 
       - name: Upload checksum file
@@ -77,6 +84,7 @@ jobs:
         with:
           name: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
           path: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+
 
   homebrew-tap:
     needs: [build, checksum]
