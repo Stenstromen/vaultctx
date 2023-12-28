@@ -45,6 +45,7 @@ jobs:
 
       - name: Package binary
         run: |
+          cp README.md ./target/${{ matrix.target }}/release/
           tar -czvf vaultctx_${{ matrix.name }}.tar.gz -C ./target/${{ matrix.target }}/release vaultctx README.md
 
       - name: Upload artifact
