@@ -68,13 +68,17 @@ jobs:
         with:
           path: artifacts/
 
+      - name: List contents of artifacts directory
+        run: |
+          ls -lah artifacts/
+          ls -lah artifacts/*
+
       - name: Generate checksums
         run: |
-          for file in artifacts/*.tar.gz; do
-            if [ -f "$file" ]; then
-              sha256sum "$file" >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
-            else
-              echo "Skipping $file, it is not a regular file."
+          for dir in artifacts/*/; do
+            if [ -d "$dir" ]; then
+              file=$(ls "$dir")
+              sha256sum "${dir}${file}" >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
             fi
           done
 
@@ -83,6 +87,7 @@ jobs:
         with:
           name: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
           path: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+
 
 
   homebrew-tap:
