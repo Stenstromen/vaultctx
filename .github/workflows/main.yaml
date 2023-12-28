@@ -170,7 +170,7 @@ jobs:
           # typed: false
           # frozen_string_literal: true
           class Vaultctx < Formula
-            desc "Description of your project"
+            desc "Context switching for Hashicorp Vault with support for multiple vaults and namespaces"
             homepage "${REPO_URL}"
             version "${VERSIONTAG}"
 
