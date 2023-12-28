@@ -1,0 +1,156 @@
+name: VaultCTX Build and Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            arch: x86_64
+            name: Darwin_x86_64
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            arch: arm64
+            name: Darwin_arm64
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            arch: x86_64
+            name: Linux_x86_64
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            arch: arm64
+            name: Linux_arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build binary
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Package binary
+        run: |
+          tar -czvf vaultctx_${{ matrix.name }}.tar.gz -C ./target/${{ matrix.target }}/release vaultctx README.md
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vaultctx_${{ matrix.name }}.tar.gz
+          path: vaultctx_${{ matrix.name }}.tar.gz
+
+  checksum:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      VERSIONTAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Generate checksums
+        run: |
+          for file in *.tar.gz; do
+            sha256sum $file >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+          done
+
+      - name: Upload checksum file
+        uses: actions/upload-artifact@v2
+        with:
+          name: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+          path: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+
+  homebrew-tap:
+    needs: [build, checksum]
+    runs-on: ubuntu-latest
+    env:
+      VERSIONTAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Checkout homebrew-tap repository
+        uses: actions/checkout@v2
+        with:
+          repository: stenstromen/homebrew-tap
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: homebrew-tap
+
+      - name: Download checksum file
+        uses: actions/download-artifact@v2
+        with:
+          name: vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+          path: .
+
+      - name: Create Homebrew Formula
+        run: |
+          REPO_NAME="vaultctx"
+          REPO_URL="https://github.com/Stenstromen/${REPO_NAME}"
+          FORMULA_PATH="homebrew-tap/Formula/${REPO_NAME}.rb"
+
+          cat > "${FORMULA_PATH}" << EOF
+          # typed: false
+          # frozen_string_literal: true
+          class Vaultctx < Formula
+            desc "Description of your project"
+            homepage "${REPO_URL}"
+            version "${VERSIONTAG}"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "${REPO_URL}/releases/download/v${VERSIONTAG}/${REPO_NAME}_Darwin_arm64.tar.gz"
+                sha256 "$(grep 'Darwin_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+
+                def install
+                  bin.install "${REPO_NAME}"
+                end
+              end
+              if Hardware::CPU.intel?
+                url "${REPO_URL}/releases/download/v${VERSIONTAG}/${REPO_NAME}_Darwin_x86_64.tar.gz"
+                sha256 "$(grep 'Darwin_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+
+                def install
+                  bin.install "${REPO_NAME}"
+                end
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+                url "${REPO_URL}/releases/download/v${VERSIONTAG}/${REPO_NAME}_Linux_arm64.tar.gz"
+                sha256 "$(grep 'Linux_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+
+                def install
+                  bin.install "${REPO_NAME}"
+                end
+              end
+              if Hardware::CPU.intel?
+                url "${REPO_URL}/releases/download/v${VERSIONTAG}/${REPO_NAME}_Linux_x86_64.tar.gz"
+                sha256 "$(grep 'Linux_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+
+                def install
+                  bin.install "${REPO_NAME}"
+                end
+              end
+            end
+          end
+          EOF
+
+      - name: Commit and Push Homebrew Formula
+        run: |
+          cd homebrew-tap
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add Formula/vaultctx.rb
+          git commit -m "Update vaultctx formula for version $VERSIONTAG"
+          git push
