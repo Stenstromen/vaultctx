@@ -1,4 +1,4 @@
-use clap::{command, Parser};
+use clap::{arg, command, Parser};
 use serde::{Serialize, Deserialize};
 
 const ABOUT: &str = "Context switching for Hashicorp Vault";
@@ -9,15 +9,15 @@ const AUTHOR: &str = "Stenstromen";
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author = AUTHOR, version = VERSION, about = ABOUT, long_about = LONG_ABOUT)]
 pub struct Args {
-    #[arg(short, long)]
+    #[arg(short, long, help = "Switch to previous context")]
     pub switchcontext: bool,
 
-    #[arg(short, long)]
+    #[arg(short, long, help = "Show current context")]
     pub currentcontext: bool,
 
-    #[arg(short, long)]
+    #[arg(short, long, help = "Delete context")]
     pub delete: Option<String>,
 
-    #[arg(required = false)]
+    #[arg(required = false, help = "Vault context")]
     pub vault_context: Option<String>,
 }
