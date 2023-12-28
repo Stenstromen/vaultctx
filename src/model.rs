@@ -21,7 +21,7 @@ pub struct Config {
     pub log_level: Option<LogLevel>,
     pub max_retries: Option<MaxRetries>,
     pub redirect_addr: Option<String>,
-    pub skip_verify: Option<String>,
+    pub skip_verify: Option<SkipVerify>,
     pub cli_no_color: Option<String>,
     pub rate_limit: Option<String>,
     pub namespace: Option<String>,
@@ -29,7 +29,7 @@ pub struct Config {
     pub mfa: Option<String>,
     pub http_proxy: Option<String>,
     pub proxy_addr: Option<String>,
-    pub disable_redirects: Option<String>,
+    pub disable_redirects: Option<DisableRedirects>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -56,6 +56,24 @@ pub enum MaxRetries {
     Zero,
     One,
     Two,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SkipVerify {
+    True,
+    False,
+    Zero,
+    One,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DisableRedirects {
+    True,
+    False,
+    Zero,
+    One,
 }
 
 impl fmt::Display for Format {
@@ -86,6 +104,28 @@ impl fmt::Display for MaxRetries {
             MaxRetries::Zero => "0",
             MaxRetries::One => "1",
             MaxRetries::Two => "2",
+        })
+    }
+}
+
+impl fmt::Display for SkipVerify {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            SkipVerify::True => "true",
+            SkipVerify::False => "false",
+            SkipVerify::Zero => "0",
+            SkipVerify::One => "1",
+        })
+    }
+}
+
+impl fmt::Display for DisableRedirects {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            DisableRedirects::True => "true",
+            DisableRedirects::False => "false",
+            DisableRedirects::Zero => "0",
+            DisableRedirects::One => "1",
         })
     }
 }

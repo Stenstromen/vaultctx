@@ -5,7 +5,7 @@ use std::{
     os::unix::fs::PermissionsExt,
 };
 
-use crate::model::{ Config, Format, LogLevel, MaxRetries };
+use crate::model::{ Config, Format, LogLevel, MaxRetries, SkipVerify, DisableRedirects };
 
 const PREVIOUS_CONTEXT_FILE: &str = ".previous_vault_context";
 
@@ -39,7 +39,7 @@ pub fn create_vaultctx_file(_configs: Vec<Config>) {
         log_level: Some(LogLevel::Info),
         max_retries: Some(MaxRetries::Two),
         redirect_addr: Some("asd".to_string()),
-        skip_verify: Some("asd".to_string()),
+        skip_verify: Some(SkipVerify::False),
         cli_no_color: Some("asd".to_string()),
         rate_limit: Some("asd".to_string()),
         namespace: Some("asd".to_string()),
@@ -47,7 +47,7 @@ pub fn create_vaultctx_file(_configs: Vec<Config>) {
         mfa: Some("asd".to_string()),
         http_proxy: Some("asd".to_string()),
         proxy_addr: Some("asd".to_string()),
-        disable_redirects: Some("asd".to_string()),
+        disable_redirects: Some(DisableRedirects::False),
     };
 
     let configs = vec![dummy_vault];
