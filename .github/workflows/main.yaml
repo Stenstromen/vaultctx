@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./vaultctx_${{ github.event.release.tag_name }}_checksums.txt
+          asset_path: /home/runner/work/vaultctx/vaultctx/artifacts/vaultctx_${{ github.event.release.tag_name }}_checksums.txt
           asset_name: vaultctx_${{ github.event.release.tag_name }}_checksums.txt
           asset_content_type: text/plain
 
@@ -107,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./artifacts/vaultctx_Darwin_x86_64.tar.gz/vaultctx_Darwin_x86_64.tar.gz
+          asset_path: /home/runner/work/vaultctx/vaultctx/artifacts/vaultctx_Darwin_x86_64.tar.gz
           asset_name: vaultctx_Darwin_x86_64.tar.gz
           asset_content_type: application/gzip
 
@@ -117,7 +117,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./artifacts/vaultctx_Darwin_arm64.tar.gz/vaultctx_Darwin_arm64.tar.gz
+          asset_path: /home/runner/work/vaultctx/vaultctx/artifacts/vaultctx_Darwin_arm64.tar.gz
           asset_name: vaultctx_Darwin_arm64.tar.gz
           asset_content_type: application/gzip
 
@@ -127,7 +127,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./artifacts/vaultctx_Linux_x86_64.tar.gz/vaultctx_Linux_x86_64.tar.gz
+          asset_path: /home/runner/work/vaultctx/vaultctx/artifacts/vaultctx_Linux_x86_64.tar.gz
           asset_name: vaultctx_Linux_x86_64.tar.gz
           asset_content_type: application/gzip
 
@@ -137,7 +137,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./artifacts/vaultctx_Linux_arm64.tar.gz/vaultctx_Linux_arm64.tar.gz
+          asset_path: /home/runner/work/vaultctx/vaultctx/artifacts/vaultctx_Linux_arm64.tar.gz
           asset_name: vaultctx_Linux_arm64.tar.gz
           asset_content_type: application/gzip
 
