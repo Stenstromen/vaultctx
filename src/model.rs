@@ -19,7 +19,7 @@ pub struct Config {
     pub license: Option<String>,
     pub license_path: Option<String>,
     pub log_level: Option<LogLevel>,
-    pub max_retries: Option<String>,
+    pub max_retries: Option<MaxRetries>,
     pub redirect_addr: Option<String>,
     pub skip_verify: Option<String>,
     pub cli_no_color: Option<String>,
@@ -42,13 +42,20 @@ pub enum LogLevel {
     Err,
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Format {
     Table,
     Json,
     Yaml,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MaxRetries {
+    Zero,
+    One,
+    Two,
 }
 
 impl fmt::Display for Format {
@@ -69,6 +76,16 @@ impl fmt::Display for LogLevel {
             LogLevel::Info => "info",
             LogLevel::Warn => "warn",
             LogLevel::Err => "error",
+        })
+    }
+}
+
+impl fmt::Display for MaxRetries {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            MaxRetries::Zero => "0",
+            MaxRetries::One => "1",
+            MaxRetries::Two => "2",
         })
     }
 }

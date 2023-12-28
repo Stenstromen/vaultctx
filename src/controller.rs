@@ -5,7 +5,7 @@ use std::{
     os::unix::fs::PermissionsExt,
 };
 
-use crate::model::{ Config, Format, LogLevel };
+use crate::model::{ Config, Format, LogLevel, MaxRetries };
 
 const PREVIOUS_CONTEXT_FILE: &str = ".previous_vault_context";
 
@@ -37,7 +37,7 @@ pub fn create_vaultctx_file(_configs: Vec<Config>) {
         license: Some("asd".to_string()),
         license_path: Some("asd".to_string()),
         log_level: Some(LogLevel::Info),
-        max_retries: Some("asd".to_string()),
+        max_retries: Some(MaxRetries::Two),
         redirect_addr: Some("asd".to_string()),
         skip_verify: Some("asd".to_string()),
         cli_no_color: Some("asd".to_string()),
