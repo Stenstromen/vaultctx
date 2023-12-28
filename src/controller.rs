@@ -5,7 +5,7 @@ use std::{
     os::unix::fs::PermissionsExt,
 };
 
-use crate::model::{ Config, Format, LogLevel, MaxRetries, SkipVerify, DisableRedirects };
+use crate::model::{ Config, Format, LogLevel, MaxRetries, SkipVerify, DisableRedirects, CliNoColor };
 
 const PREVIOUS_CONTEXT_FILE: &str = ".previous_vault_context";
 
@@ -25,28 +25,28 @@ pub fn create_vaultctx_file(_configs: Vec<Config>) {
     let dummy_vault = Config {
         name: "dummy_vault".to_string(),
         addr: "127.0.0.1".to_string(),
-        token: "sometoken".to_string(),
-        cacert: Some("asd".to_string()),
-        tls_server_name: Some("asd".to_string()),
-        capath: Some("asd".to_string()),
-        client_cert: Some("asd".to_string()),
-        client_key: Some("asd".to_string()),
-        client_timeout: Some("asd".to_string()),
-        cluster_addr: Some("asd".to_string()),
+        token: "hvs.abcdefghijklmnopqrstxyz".to_string(),
+        cacert: Some("ca.crt".to_string()),
+        tls_server_name: Some("vault.local".to_string()),
+        capath: Some("/etc/ssl/certs".to_string()),
+        client_cert: Some("cert.crt".to_string()),
+        client_key: Some("cert.key".to_string()),
+        client_timeout: Some("30".to_string()),
+        cluster_addr: Some("1.1.1.1".to_string()),
         format: Some(Format::Table),
-        license: Some("asd".to_string()),
-        license_path: Some("asd".to_string()),
+        license: Some("license.lic".to_string()),
+        license_path: Some("/etc/vault/license".to_string()),
         log_level: Some(LogLevel::Info),
         max_retries: Some(MaxRetries::Two),
-        redirect_addr: Some("asd".to_string()),
+        redirect_addr: Some("1.0.0.1".to_string()),
         skip_verify: Some(SkipVerify::False),
-        cli_no_color: Some("asd".to_string()),
-        rate_limit: Some("asd".to_string()),
-        namespace: Some("asd".to_string()),
-        srv_lookup: Some("asd".to_string()),
-        mfa: Some("asd".to_string()),
-        http_proxy: Some("asd".to_string()),
-        proxy_addr: Some("asd".to_string()),
+        cli_no_color: Some(CliNoColor::False),
+        rate_limit: Some("null".to_string()),
+        namespace: Some("null".to_string()),
+        srv_lookup: Some("null".to_string()),
+        mfa: Some("null".to_string()),
+        http_proxy: Some("null".to_string()),
+        proxy_addr: Some("null".to_string()),
         disable_redirects: Some(DisableRedirects::False),
     };
 

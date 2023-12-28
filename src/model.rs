@@ -22,7 +22,7 @@ pub struct Config {
     pub max_retries: Option<MaxRetries>,
     pub redirect_addr: Option<String>,
     pub skip_verify: Option<SkipVerify>,
-    pub cli_no_color: Option<String>,
+    pub cli_no_color: Option<CliNoColor>,
     pub rate_limit: Option<String>,
     pub namespace: Option<String>,
     pub srv_lookup: Option<String>,
@@ -70,6 +70,15 @@ pub enum SkipVerify {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DisableRedirects {
+    True,
+    False,
+    Zero,
+    One,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CliNoColor {
     True,
     False,
     Zero,
@@ -126,6 +135,17 @@ impl fmt::Display for DisableRedirects {
             DisableRedirects::False => "false",
             DisableRedirects::Zero => "0",
             DisableRedirects::One => "1",
+        })
+    }
+}
+
+impl fmt::Display for CliNoColor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            CliNoColor::True => "true",
+            CliNoColor::False => "false",
+            CliNoColor::Zero => "0",
+            CliNoColor::One => "1",
         })
     }
 }
