@@ -71,7 +71,7 @@ jobs:
       - name: Generate checksums
         run: |
           for file in artifacts/*.tar.gz/*.tar.gz; do
-            sha256sum "$file" | awk -F'/' '{print $1 " " $(NF)}' >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+            sha256sum "$file" | awk '{gsub(/.*\//, "", $2); print $1 "  " $2}' >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
           done
 
       - name: Upload checksum file
@@ -176,7 +176,7 @@ jobs:
             on_macos do
               if Hardware::CPU.arm?
                 url "${REPO_URL}/releases/download/${VERSIONTAG}/${REPO_NAME}_Darwin_arm64.tar.gz"
-                sha256 "$(grep 'Darwin_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt/vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+                sha256 "$(grep 'Darwin_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
 
                 def install
                   bin.install "${REPO_NAME}"
@@ -184,7 +184,7 @@ jobs:
               end
               if Hardware::CPU.intel?
                 url "${REPO_URL}/releases/download/${VERSIONTAG}/${REPO_NAME}_Darwin_x86_64.tar.gz"
-                sha256 "$(grep 'Darwin_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt/vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+                sha256 "$(grep 'Darwin_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
 
                 def install
                   bin.install "${REPO_NAME}"
@@ -195,7 +195,7 @@ jobs:
             on_linux do
               if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
                 url "${REPO_URL}/releases/download/${VERSIONTAG}/${REPO_NAME}_Linux_arm64.tar.gz"
-                sha256 "$(grep 'Linux_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt/vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+                sha256 "$(grep 'Linux_arm64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
 
                 def install
                   bin.install "${REPO_NAME}"
@@ -203,7 +203,7 @@ jobs:
               end
               if Hardware::CPU.intel?
                 url "${REPO_URL}/releases/download/${VERSIONTAG}/${REPO_NAME}_Linux_x86_64.tar.gz"
-                sha256 "$(grep 'Linux_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt/vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
+                sha256 "$(grep 'Linux_x86_64.tar.gz' vaultctx_${VERSIONTAG}_checksums.txt | awk '{print \$1}')"
 
                 def install
                   bin.install "${REPO_NAME}"
