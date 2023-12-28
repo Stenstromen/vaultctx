@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: stenstromen/homebrew-tap
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
           path: homebrew-tap
 
       - name: Download checksum file
