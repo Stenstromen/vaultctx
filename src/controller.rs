@@ -164,6 +164,39 @@ pub fn switch_to_previous_context() {
     }
 }
 
+pub fn rename_context(old_name: &str, new_name: &str) {
+    let home_dir = dirs::home_dir().expect("Failed to find home directory");
+    let config_path = home_dir.join(".vaultctx");
+    
+    // Read the existing configuration
+    let contents = fs::read_to_string(&config_path)
+        .expect("Failed to read .vaultctx");
+    let mut configs: Vec<Config> = serde_yaml::from_str(&contents)
+        .expect("Failed to parse YAML");
+
+    // Find and update the entry with the new name
+    let mut renamed = false;
+    for config in &mut configs {
+        if config.name == old_name {
+            config.name = new_name.to_string();
+            renamed = true;
+            break;
+        }
+    }
+
+    if renamed {
+        // Write the updated configuration back to the file
+        let new_contents = serde_yaml::to_string(&configs)
+            .expect("Failed to serialize data");
+        fs::write(&config_path, new_contents)
+            .expect("Failed to write to .vaultctx");
+        println!("Context renamed from '{}' to '{}'", old_name, new_name);
+    } else {
+        println!("Context '{}' not found", old_name);
+    }
+}
+
+
 fn save_current_context() {
     let home_dir = dirs::home_dir().expect("Failed to find home directory");
     let vctx_path = home_dir.join(".vctx");
