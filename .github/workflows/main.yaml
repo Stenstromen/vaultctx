@@ -70,10 +70,9 @@ jobs:
 
       - name: Generate checksums
         run: |
-          sha256sum artifacts/vaultctx_Darwin_arm64.tar.gz/vaultctx_Darwin_arm64.tar.gz > vaultctx_${{ env.VERSIONTAG }}_checksums.txt
-          sha256sum artifacts/vaultctx_Darwin_x86_64.tar.gz/vaultctx_Darwin_x86_64.tar.gz >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
-          sha256sum artifacts/vaultctx_Linux_arm64.tar.gz/vaultctx_Linux_arm64.tar.gz >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
-          sha256sum artifacts/vaultctx_Linux_x86_64.tar.gz/vaultctx_Linux_x86_64.tar.gz >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt 
+          for file in artifacts/*.tar.gz/*.tar.gz; do
+            sha256sum "$file" | awk '{print $1 " " substr($2, index($2, "/")+1)}' >> vaultctx_${{ env.VERSIONTAG }}_checksums.txt
+          done
 
       - name: Upload checksum file
         uses: actions/upload-artifact@v2
