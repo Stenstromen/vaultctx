@@ -1,8 +1,10 @@
 use core::fmt;
+use std::{fs, path::Path};
 
 /* use clap::{command, Parser}; */
 use serde::{ Deserialize, Serialize };
 
+use crate::controller::create_vaultctx_file;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RenameArgs(pub String, pub String);
 
@@ -33,6 +35,10 @@ pub struct Config {
     pub http_proxy: Option<String>,
     pub proxy_addr: Option<String>,
     pub disable_redirects: Option<DisableRedirects>,
+}
+
+pub struct SharedData {
+    pub configs: Vec<Config>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -86,6 +92,26 @@ pub enum CliNoColor {
     False,
     Zero,
     One,
+}
+
+impl SharedData {
+    pub fn new() -> Self {
+        let home_dir = dirs::home_dir().expect("Failed to find home directory");
+        let config_path = home_dir.join(".vaultctx");
+
+        if !Path::new(&config_path).exists() {
+            println!("Initial dummy config created at ~/.vaultctx");
+            create_vaultctx_file(Vec::new());
+            panic!("Failed to create initial config");
+        }
+
+        let contents = fs::read_to_string(&config_path).expect("Failed to read config");
+        let configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
+
+        Self {
+            configs,
+        }
+    }
 }
 
 impl fmt::Display for Format {
