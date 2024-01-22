@@ -1,24 +1,59 @@
+use std::{ env, io::Cursor, process::Command };
+use skim::prelude::{ Skim, SkimItemReader, SkimOptionsBuilder };
 
-use std::{path::Path, fs};
-
-use crate::model::Config;
-use crate::controller::create_vaultctx_file;
+use crate::model::SharedData;
 
 pub fn list_contexts() {
-    let home_dir = dirs::home_dir().expect("Failed to find home directory");
-    let config_path = home_dir.join(".vaultctx");
-
-    if !Path::new(&config_path).exists() {
-        println!("Initial dummy config created at ~/.vaultctx");
-        create_vaultctx_file(Vec::new());
-        return;
+    if env::var("VAULTCTX_IGNORE_FZF").unwrap_or_default() == "1" {
+        choose_context();
+    } else {
+        choose_context_interactive();
     }
+}
 
-    let contents = fs::read_to_string(&config_path).expect("Failed to read config");
+fn choose_context() {
+    let data = SharedData::new();
 
-    let configs: Vec<Config> = serde_yaml::from_str(&contents).expect("Failed to parse YAML");
-
-    for config in configs {
+    for config in &data.configs {
         println!("{}", config.name);
+    }
+}
+
+fn choose_context_interactive() {
+    let data = SharedData::new();
+
+    let names: Vec<String> = data.configs
+        .into_iter()
+        .map(|config| config.name)
+        .collect();
+    let names_str = names.join("\n");
+
+    let options = SkimOptionsBuilder::default().height(Some("50%")).multi(false).build().unwrap();
+
+    let item_reader = SkimItemReader::default();
+    let items = item_reader.of_bufread(Cursor::new(names_str));
+
+    if let Some(output) = Skim::run_with(&options, Some(items)) {
+        if !output.is_abort {
+            let selected_items = output.selected_items;
+            let selected_entry = selected_items.get(0).unwrap().output();
+
+            let current_exe = env::current_exe().expect("Failed to get current executable");
+
+            let status = Command::new(current_exe)
+                .arg(selected_entry.as_ref())
+                .status()
+                .expect("Failed to execute command");
+
+            if status.success() {
+                println!("Command executed successfully.");
+            } else {
+                eprintln!("Command failed to execute.");
+            }
+        } else {
+            println!("No entry selected");
+        }
+    } else {
+        println!("Skim failed to run");
     }
 }

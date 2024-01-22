@@ -22,6 +22,18 @@ cargo build --release
 ./target/release/vaultctx
 ```
 
+## Interactive Mode
+
+Interactive mode (FuzzyFind via skim create) enabled by default:
+
+Set:
+
+```bash
+VAULTCTX_IGNORE_FZF=1
+```
+
+To disable
+
 ## Example Usage
 
 ```bash
